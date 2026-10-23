@@ -1,0 +1,20 @@
+@core_HostAddress = http://localhost:5000
+
+GET {{core_HostAddress}}/api/PartQuantity
+Accept: application/json
+
+###
+
+PUT {{core_HostAddress}}/api/PartQuantity
+Content-Type: application/json
+
+{
+  "quantity": 25
+}
+
+###
+
+GET {{core_HostAddress}}/api/PartQuantity
+Accept: application/json
+
+###

@@ -1,0 +1,37 @@
+<section class="warehouse-card" aria-labelledby="warehouseTitle">
+    <p class="warehouse-eyebrow">仓库 · 1 个零件</p>
+    <h1 id="warehouseTitle" class="warehouse-title">零件数量</h1>
+    <p class="warehouse-description">
+        输入数量并保存。下次打开页面时，会从后端读取上次保存的数量。
+    </p>
+
+    <form id="warehouseQuantityForm" class="warehouse-form">
+        <label for="warehouseQuantity">数量</label>
+        <input
+            id="warehouseQuantity"
+            name="quantity"
+            class="warehouse-input"
+            type="number"
+            min="0"
+            max="1000000"
+            step="1"
+            inputmode="numeric"
+            required>
+        <button id="warehouseSaveButton" class="warehouse-save-button" type="submit">
+            保存
+        </button>
+    </form>
+
+    <div class="warehouse-saved">
+        <span>上次保存数量</span>
+        <strong id="warehouseSavedQuantity">--</strong>
+    </div>
+
+    <p
+        id="warehouseStatus"
+        class="status warehouse-status"
+        role="status"
+        aria-live="polite">
+        正在读取保存数量...
+    </p>
+</section>

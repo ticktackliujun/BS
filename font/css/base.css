@@ -1,0 +1,62 @@
+:root {
+    font-family: "Microsoft YaHei", system-ui, sans-serif;
+    color: #17212b;
+    background: #eef2f5;
+    --color-text: #17212b;
+    --color-muted: #5c6b78;
+    --color-border: #d7e0e8;
+    --color-primary: #126b9a;
+    --color-primary-hover: #0d557c;
+    --color-success: #17734b;
+    --color-error: #b42318;
+    --surface: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+p {
+    margin: 0;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 9px;
+    color: #ffffff;
+    background: var(--color-primary);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+button:hover {
+    background: var(--color-primary-hover);
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.62;
+}
+
+.status {
+    min-height: 24px;
+    color: var(--color-muted);
+    line-height: 1.5;
+}
+
+.status[data-type="success"] {
+    color: var(--color-success);
+}
+
+.status[data-type="error"] {
+    color: var(--color-error);
+}
