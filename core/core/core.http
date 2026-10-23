@@ -1,5 +1,16 @@
 @core_HostAddress = http://localhost:5000
 
+### 登录
+POST {{core_HostAddress}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+###
+
 GET {{core_HostAddress}}/api/PartQuantity
 Accept: application/json
 

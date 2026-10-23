@@ -1,6 +1,6 @@
 import { defaultModuleName, modules } from "./modules.js";
+import { loadHtml, loadStyle } from "./utils/loader.js";
 
-const loadedStyles = new Map();
 let currentCleanup = null;
 let navigationId = 0;
 
@@ -18,43 +18,6 @@ function setActiveNavigation(routeName) {
             link.removeAttribute("aria-current");
         }
     });
-}
-
-function loadStyle(href) {
-    if (loadedStyles.has(href)) {
-        return loadedStyles.get(href);
-    }
-
-    const promise = new Promise((resolve, reject) => {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = href;
-        link.dataset.moduleStyle = href;
-        link.addEventListener("load", resolve, { once: true });
-        link.addEventListener(
-            "error",
-            () => reject(new Error(`模块样式加载失败：${href}`)),
-            { once: true }
-        );
-        document.head.append(link);
-    });
-
-    loadedStyles.set(href, promise);
-    return promise;
-}
-
-async function loadHtml(htmlPath) {
-    const response = await fetch(htmlPath, {
-        headers: {
-            Accept: "text/html"
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error(`模块页面加载失败：HTTP ${response.status}`);
-    }
-
-    return response.text();
 }
 
 function showLoadError(container, message) {
@@ -83,7 +46,7 @@ export async function startRouter(container) {
         }
 
         setActiveNavigation(routeName);
-        document.title = `${currentModule.title} - 车间管理`;
+        document.title = `${currentModule.title} - 零部件管理系统`;
         container.replaceChildren();
 
         const loading = document.createElement("p");
@@ -129,6 +92,16 @@ export async function startRouter(container) {
         history.replaceState(null, "", `#${defaultModuleName}`);
     }
 
-    window.addEventListener("hashchange", loadCurrentRoute);
+    const handleHashChange = () => {
+        void loadCurrentRoute();
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
     await loadCurrentRoute();
+
+    return () => {
+        window.removeEventListener("hashchange", handleHashChange);
+        currentCleanup?.();
+        currentCleanup = null;
+    };
 }

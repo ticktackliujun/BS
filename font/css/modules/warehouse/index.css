@@ -1,21 +1,24 @@
 .warehouse-card {
-    padding: 32px;
+    width: min(100%, 900px);
+    margin: 0 auto;
+    padding: 24px;
     border: 1px solid var(--color-border);
-    border-radius: 16px;
+    border-radius: 6px;
     background: var(--surface);
-    box-shadow: 0 16px 45px rgb(31 52 70 / 10%);
+    box-shadow: 0 4px 12px rgb(15 23 42 / 4%);
 }
 
 .warehouse-eyebrow {
     margin-bottom: 8px;
-    color: #33708f;
+    color: #2563eb;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.08em;
 }
 
 .warehouse-title {
-    font-size: clamp(30px, 8vw, 44px);
+    font-size: 26px;
+    line-height: 34px;
 }
 
 .warehouse-description {
@@ -37,13 +40,13 @@
     width: 100%;
     padding: 13px 14px;
     border: 1px solid #b9c8d4;
-    border-radius: 9px;
-    font-size: 24px;
+    border-radius: 6px;
+    font-size: 19px;
 }
 
 .warehouse-input:focus {
-    border-color: #1675a4;
-    outline: 3px solid rgb(22 117 164 / 16%);
+    border-color: #2563eb;
+    outline: 3px solid rgb(37 99 235 / 12%);
 }
 
 .warehouse-save-button {
@@ -57,8 +60,9 @@
     gap: 16px;
     margin-top: 24px;
     padding: 16px;
-    border-radius: 10px;
-    background: #f1f6f9;
+    border: 1px solid #dbeafe;
+    border-radius: 6px;
+    background: #f8fbff;
 }
 
 .warehouse-saved span {

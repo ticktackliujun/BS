@@ -1,6 +1,7 @@
 # Build directories
 build/
-*.md
+!FRONTEND-ARCHITECTURE.md
+!BACKEND-ARCHITECTURE.md
 obj/
 bin/
 .vs/

@@ -1,0 +1,58 @@
+<div class="login-page">
+    <section class="login-left">
+        <p class="login-eyebrow">DIGITAL PARTS MANAGEMENT</p>
+        <h1 class="login-title">零部件数字化管理系统</h1>
+        <p class="login-copy">
+            面向零部件数量维护、过程记录和后续装配业务的管理入口。
+        </p>
+        <div class="login-brand-line">
+            <span class="login-brand-mark" aria-hidden="true"></span>
+            <span>统一账号 · 角色识别 · 清晰流程</span>
+        </div>
+    </section>
+
+    <section class="login-right">
+        <form id="loginForm" class="login-panel" novalidate>
+            <div>
+                <p class="login-panel-eyebrow">ACCOUNT LOGIN</p>
+                <h2>登录</h2>
+                <p class="login-panel-copy">请输入账号和密码进入系统。</p>
+            </div>
+
+            <label class="login-field" for="loginUsername">
+                <span>账号</span>
+                <input
+                    id="loginUsername"
+                    name="username"
+                    type="text"
+                    autocomplete="username"
+                    required>
+            </label>
+
+            <label class="login-field" for="loginPassword">
+                <span>密码</span>
+                <input
+                    id="loginPassword"
+                    name="password"
+                    type="password"
+                    autocomplete="current-password"
+                    required>
+            </label>
+
+            <div class="login-role-preview">
+                <span>登录后识别角色</span>
+                <strong>项目管理员</strong>
+            </div>
+
+            <button id="loginButton" class="login-submit" type="submit">
+                进入系统
+            </button>
+
+            <p
+                id="loginStatus"
+                class="status login-status"
+                role="status"
+                aria-live="polite"></p>
+        </form>
+    </section>
+</div>
