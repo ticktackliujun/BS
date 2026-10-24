@@ -1,5 +1,8 @@
-import { setBusy, showStatus } from "../../js/utils/helper.js";
-import { login } from "./authService.js";
+import {
+    setBusy,
+    showStatus
+} from "../../js/utils/helper.js?v=20261024-4";
+import { login } from "./authService.js?v=20261024-4";
 
 export async function mount(root, options) {
     const form = root.querySelector("#loginForm");

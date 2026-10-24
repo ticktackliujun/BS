@@ -7,13 +7,28 @@ export class ApiError extends Error {
 }
 
 export async function requestJson(url, options = {}) {
-    const response = await fetch(url, {
-        ...options,
+    const {
+        signal,
+        headers: optionHeaders,
+        ...requestOptions
+    } = options;
+    const fetchOptions = {
+        credentials: "same-origin",
+        ...requestOptions,
         headers: {
             Accept: "application/json",
-            ...options.headers
+            ...optionHeaders
         }
-    });
+    };
+
+    if (
+        typeof globalThis.AbortSignal === "function" &&
+        signal instanceof globalThis.AbortSignal
+    ) {
+        fetchOptions.signal = signal;
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     const data = await response.json().catch(() => ({}));
 
@@ -23,7 +38,10 @@ export async function requestJson(url, options = {}) {
             : null;
 
         throw new ApiError(
-            validationMessage || data.title || `请求失败：HTTP ${response.status}`,
+            validationMessage ||
+                data.detail ||
+                data.title ||
+                `请求失败：HTTP ${response.status}`,
             response.status
         );
     }

@@ -1,11 +1,26 @@
-import { defaultModuleName, modules } from "./modules.js";
-import { loadHtml, loadStyle } from "./utils/loader.js";
+import {
+    defaultModuleName,
+    modules
+} from "./modules.js?v=20261024-4";
+import {
+    loadHtml,
+    loadStyle
+} from "./utils/loader.js?v=20261024-4";
 
 let currentCleanup = null;
 let navigationId = 0;
 
 function getRouteName() {
     return location.hash.slice(1).trim() || defaultModuleName;
+}
+
+function withVersion(path, version) {
+    if (!version) {
+        return path;
+    }
+
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}v=${encodeURIComponent(version)}`;
 }
 
 function setActiveNavigation(routeName) {
@@ -29,7 +44,7 @@ function showLoadError(container, message) {
     container.append(error);
 }
 
-export async function startRouter(container) {
+export async function startRouter(container, user) {
     if (!(container instanceof HTMLElement)) {
         throw new Error("找不到 #app-content 容器。");
     }
@@ -45,8 +60,16 @@ export async function startRouter(container) {
             return;
         }
 
+        if (currentModule.adminOnly && user.role !== "admin") {
+            history.replaceState(null, "", `#${defaultModuleName}`);
+            await loadCurrentRoute();
+            return;
+        }
+
         setActiveNavigation(routeName);
         document.title = `${currentModule.title} - 零部件管理系统`;
+        document.querySelector("#currentPageTitle").textContent =
+            currentModule.title;
         container.replaceChildren();
 
         const loading = document.createElement("p");
@@ -55,9 +78,22 @@ export async function startRouter(container) {
         container.append(loading);
 
         try {
+            const htmlPath = withVersion(
+                currentModule.html,
+                currentModule.version
+            );
+            const stylePath = withVersion(
+                currentModule.style,
+                currentModule.version
+            );
+            const scriptPath = withVersion(
+                currentModule.script,
+                currentModule.version
+            );
+
             const [html] = await Promise.all([
-                loadHtml(currentModule.html),
-                loadStyle(currentModule.style)
+                loadHtml(htmlPath),
+                loadStyle(stylePath)
             ]);
 
             if (requestedNavigation !== navigationId) {
@@ -68,7 +104,7 @@ export async function startRouter(container) {
             currentCleanup = null;
             container.innerHTML = html;
 
-            const moduleEntry = await import(currentModule.script);
+            const moduleEntry = await import(scriptPath);
 
             if (requestedNavigation !== navigationId) {
                 return;

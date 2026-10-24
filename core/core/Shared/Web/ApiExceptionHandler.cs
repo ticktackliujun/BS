@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace core.Shared.Web;
 
@@ -14,6 +15,22 @@ internal sealed class ApiExceptionHandler(
     {
         var (statusCode, title, detail) = exception switch
         {
+            ArgumentException => (
+                StatusCodes.Status400BadRequest,
+                "请求参数错误",
+                exception.Message),
+            KeyNotFoundException => (
+                StatusCodes.Status404NotFound,
+                "数据不存在",
+                exception.Message),
+            InvalidOperationException => (
+                StatusCodes.Status409Conflict,
+                "数据冲突",
+                exception.Message),
+            DbUpdateException => (
+                StatusCodes.Status409Conflict,
+                "数据冲突",
+                "账号或角色数据冲突，请检查后重试。"),
             JsonException => (
                 StatusCodes.Status500InternalServerError,
                 "库存数据文件格式错误",

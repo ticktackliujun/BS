@@ -1,10 +1,13 @@
-import { mountShell } from "./shell.js";
+import { mountShell } from "./shell.js?v=20261024-4";
 import {
     clearCurrentUser,
     getCurrentUser,
     saveCurrentUser
-} from "./session.js";
-import { loadHtml, loadStyle } from "./utils/loader.js";
+} from "./session.js?v=20261024-4";
+import {
+    loadHtml,
+    loadStyle
+} from "./utils/loader.js?v=20261024-4";
 
 const root = document.querySelector("#app");
 let disposeCurrentView = null;

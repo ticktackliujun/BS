@@ -10,12 +10,20 @@
                 <span class="app-nav-icon" aria-hidden="true">◇</span>
                 <span>零部件管理</span>
             </a>
+            <a
+                class="app-nav-link"
+                data-admin-only
+                href="#users"
+                hidden>
+                <span class="app-nav-icon" aria-hidden="true">◎</span>
+                <span>用户管理</span>
+            </a>
         </nav>
     </aside>
 
     <div class="app-main">
         <header class="app-header">
-            <div class="app-header-title">零部件管理</div>
+            <div id="currentPageTitle" class="app-header-title">零部件管理</div>
             <div class="app-header-actions">
                 <span id="currentUserRole" class="header-role">项目管理员</span>
                 <strong id="currentUserName" class="app-header-user"></strong>

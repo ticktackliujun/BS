@@ -1,0 +1,135 @@
+<section class="users-page" aria-labelledby="usersPageTitle">
+    <div class="users-toolbar">
+        <div>
+            <h1 id="usersPageTitle" class="users-title">用户与权限</h1>
+            <p class="users-subtitle">维护登录账号、姓名和可登录角色</p>
+        </div>
+        <button id="addUserButton" type="button">新增用户</button>
+    </div>
+
+    <p
+        id="usersStatus"
+        class="status users-status"
+        role="status"
+        aria-live="polite"></p>
+
+    <div class="users-panel">
+        <div class="users-table-scroll">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>账号</th>
+                        <th>姓名</th>
+                        <th>角色</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+            </table>
+            <p id="usersEmpty" class="users-empty" hidden>暂无用户</p>
+        </div>
+        <nav
+            id="usersPagination"
+            class="users-pagination"
+            aria-label="用户列表分页">
+            <div class="users-page-buttons">
+                <button
+                    id="usersPreviousPage"
+                    class="users-page-button"
+                    type="button">
+                    上一页
+                </button>
+                <div id="usersPageNumbers" class="users-page-numbers"></div>
+                <button
+                    id="usersNextPage"
+                    class="users-page-button"
+                    type="button">
+                    下一页
+                </button>
+            </div>
+
+            <div class="users-page-jump">
+                <span id="usersPageSummary">共 0 条</span>
+                <label for="usersPageInput">跳转</label>
+                <input
+                    id="usersPageInput"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputmode="numeric"
+                    aria-label="跳转页码">
+                <span>页</span>
+                <button id="usersJumpPage" type="button">跳转</button>
+            </div>
+        </nav>
+    </div>
+
+    <dialog id="userDialog" class="user-dialog">
+        <form id="userForm" class="user-form">
+            <div class="user-dialog-header">
+                <div>
+                    <p class="user-dialog-eyebrow">ACCOUNT MANAGEMENT</p>
+                    <h2 id="userDialogTitle">新增用户</h2>
+                </div>
+                <button
+                    id="closeUserDialogButton"
+                    class="user-dialog-close"
+                    type="button"
+                    aria-label="关闭">
+                    ×
+                </button>
+            </div>
+
+            <label class="user-field" for="userUsername">
+                <span>账号</span>
+                <input
+                    id="userUsername"
+                    type="text"
+                    maxlength="50"
+                    autocomplete="off"
+                    required>
+            </label>
+
+            <label class="user-field" for="userPassword">
+                <span>密码</span>
+                <input
+                    id="userPassword"
+                    type="password"
+                    maxlength="100"
+                    autocomplete="new-password">
+                <small id="userPasswordHint"></small>
+            </label>
+
+            <label class="user-field" for="userRealName">
+                <span>姓名</span>
+                <input
+                    id="userRealName"
+                    type="text"
+                    maxlength="50"
+                    autocomplete="off"
+                    required>
+            </label>
+
+            <label class="user-field" for="userRole">
+                <span>角色</span>
+                <select id="userRole" required></select>
+            </label>
+
+            <p
+                id="userDialogStatus"
+                class="status user-dialog-status"
+                role="status"
+                aria-live="polite"></p>
+
+            <div class="user-dialog-actions">
+                <button
+                    id="cancelUserButton"
+                    class="user-secondary-button"
+                    type="button">
+                    取消
+                </button>
+                <button id="saveUserButton" type="submit">保存</button>
+            </div>
+        </form>
+    </dialog>
+</section>

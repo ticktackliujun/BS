@@ -13,13 +13,15 @@
 - 登录状态保存与退出。
 - 登录后的白色侧边栏。
 - 侧边栏唯一业务入口“零部件管理”。
+- 管理员专属“用户管理”入口。
+- 新增用户、设置初始密码和修改角色。
+- 用户列表数据库分页，单页最多 20 条。
 - 零部件数量读取和保存页面。
 - 按业务模块动态加载 HTML、CSS、JavaScript。
 - 桌面端和窄屏基础响应式布局。
 
 当前前端没有实现：
 
-- 用户和角色管理页面。
 - 零部件新增、编辑和删除。
 - 库存流水。
 - 领料申请。
@@ -243,11 +245,19 @@ font/js/shell.js
 #app-content 模块容器
 ```
 
-侧边栏当前只有一个入口：
+侧边栏有一个默认入口：
 
 ```text
 #warehouse → 零部件管理
 ```
+
+项目管理员额外显示：
+
+```text
+#users → 用户管理
+```
+
+其他角色不显示“用户管理”，直接输入 `#users` 也会被 Router 退回零部件页面。
 
 顶部角色来自后端登录结果，不在前端写死业务判断。
 
@@ -270,6 +280,13 @@ font/js/modules.js
     html: "/modules/warehouse/index.html",
     script: "/modules/warehouse/warehouse.js",
     style: "/css/modules/warehouse/index.css"
+  },
+  users: {
+    title: "用户管理",
+    html: "/modules/users/index.html",
+    script: "/modules/users/users.js",
+    style: "/css/modules/users/index.css",
+    adminOnly: true
   }
 }
 ```
@@ -279,6 +296,8 @@ font/js/modules.js
 ```text
 warehouse
 ```
+
+`adminOnly: true` 表示该模块只允许项目管理员打开。
 
 ### 7.2 路由执行
 
@@ -427,7 +446,64 @@ PUT /api/PartQuantity
 
 前端不允许负数或非整数，但正式校验仍以后端为准。
 
-## 10. 当前文件树
+## 10. 用户管理模块
+
+目录：
+
+```text
+font/modules/users/
+├─ index.html
+├─ usersApi.js
+├─ usersService.js
+└─ users.js
+```
+
+样式：
+
+```text
+font/css/modules/users/index.css
+```
+
+页面功能：
+
+- 显示账号列表。
+- 显示姓名和角色。
+- 新增用户。
+- 设置初始密码。
+- 修改姓名和角色。
+- 编辑时重置密码；密码留空表示保持原密码。
+
+权限：
+
+- 只有登录角色为 `admin` 时显示侧边栏入口。
+- 只有管理员能加载该模块。
+- 后端 `/api/Users` 同时要求 Cookie 登录和管理员角色。
+- 安装工程师、仓库管理员只能看到“零部件管理”。
+
+当前不允许修改账号名，避免影响已有登录和业务记录。
+
+### 10.1 用户列表分页
+
+- 单页固定最多 20 个用户。
+- 页码区域最多显示 7 个元素。
+- 页数较多时使用省略号 `...`。
+- 支持上一页、下一页。
+- 支持输入页码后点击“跳转”。
+- 只渲染当前页用户，不把全部用户放入浏览器内存。
+
+页码显示规则：
+
+```text
+总页数 ≤ 7：显示全部页码
+当前页靠近开头：1 2 3 4 5 ... N
+当前页在中间：1 ... 4 5 6 ... N
+当前页靠近结尾：1 ... N-4 N-3 N-2 N-1 N
+```
+
+分页组件位于 `font/modules/users/index.html`，页码计算和加载逻辑位于
+`font/modules/users/users.js`。
+
+## 11. 当前文件树
 
 ```text
 font/
@@ -438,6 +514,8 @@ font/
 │  ├─ layout.css
 │  └─ modules/
 │     ├─ auth/
+│     │  └─ index.css
+│     ├─ users/
 │     │  └─ index.css
 │     └─ warehouse/
 │        └─ index.css
@@ -457,6 +535,11 @@ font/
    │  ├─ auth.js
    │  ├─ authApi.js
    │  └─ authService.js
+   ├─ users/
+   │  ├─ index.html
+   │  ├─ users.js
+   │  ├─ usersApi.js
+   │  └─ usersService.js
    └─ warehouse/
       ├─ index.html
       ├─ warehouse.js
@@ -464,7 +547,7 @@ font/
       └─ warehouseService.js
 ```
 
-## 11. 样式分层
+## 12. 样式分层
 
 ```text
 base.css
@@ -475,6 +558,9 @@ layout.css
 
 css/modules/auth/index.css
   登录页专属样式
+
+css/modules/users/index.css
+  用户列表和新增/编辑弹窗
 
 css/modules/warehouse/index.css
   零部件页面专属样式
@@ -487,7 +573,7 @@ css/modules/warehouse/index.css
 - 模块 CSS 使用模块前缀，例如 `.warehouse-card`。
 - 模块 CSS 不覆盖其他模块的内部类名。
 
-## 12. 部署方式
+## 13. 部署方式
 
 前端目录：
 
@@ -512,7 +598,7 @@ Nginx 负责：
 - 返回 `font` 中的静态文件。
 - 将 `/api/` 转发到 ASP.NET Core 的 `127.0.0.1:5000`。
 
-## 13. 增加新模块
+## 14. 增加新模块
 
 以“领料管理”为例：
 
@@ -535,14 +621,13 @@ Nginx 负责：
 
 模块之间不直接引用内部文件，共用代码才移到 `js/utils` 或未来的公共组件目录。
 
-## 14. 后续规划
+## 15. 后续规划
 
 建议按以下顺序扩展：
 
 1. 零部件列表和新增、编辑。
 2. 库存流水。
 3. 领料申请。
-4. 用户和角色管理。
-5. 前端权限路由和菜单控制。
-6. 请求鉴权 Token。
-7. 复杂表格出现后再评估 Vue 3 + Vite。
+4. 用户禁用和删除。
+5. 角色权限进一步细分。
+6. 复杂表格出现后再评估 Vue 3 + Vite。

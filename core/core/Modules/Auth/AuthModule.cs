@@ -1,3 +1,4 @@
+using core.Modules.Auth.Repositories;
 using core.Modules.Auth.Services;
 
 namespace core.Modules.Auth;
@@ -8,6 +9,12 @@ public static class AuthModule
         this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<
+            IUserManagementRepository,
+            UserManagementRepository>();
+        services.AddScoped<
+            IUserManagementService,
+            UserManagementService>();
         return services;
     }
 }

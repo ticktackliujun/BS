@@ -11,6 +11,12 @@ Content-Type: application/json
 
 ###
 
+### 用户分页（需要管理员 Cookie）
+GET {{core_HostAddress}}/api/Users?page=1&pageSize=20
+Accept: application/json
+
+###
+
 GET {{core_HostAddress}}/api/PartQuantity
 Accept: application/json
 

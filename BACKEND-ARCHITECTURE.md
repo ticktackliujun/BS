@@ -11,6 +11,9 @@
 - ASP.NET Core Web API。
 - Controller 路由模式。
 - 登录接口。
+- Cookie 登录会话。
+- 管理员专属用户管理接口。
+- 新增用户、修改姓名、角色和密码。
 - MySQL 用户和角色查询。
 - 首次启动创建基础表。
 - 初始化唯一管理员账号 `admin / 123456`。
@@ -20,9 +23,7 @@
 
 当前后端没有实现：
 
-- JWT 或 Cookie 登录凭证。
-- `[Authorize]` 接口权限控制。
-- 用户管理接口。
+- JWT；当前使用 Cookie。
 - 角色权限细分。
 - 零部件台账。
 - 库存流水、领料申请。
@@ -83,15 +84,22 @@ core/core/
 │  ├─ Auth/
 │  │  ├─ AuthModule.cs
 │  │  ├─ Controllers/
-│  │  │  └─ AuthController.cs
+│  │  │  ├─ AuthController.cs
+│  │  │  └─ UsersController.cs
 │  │  ├─ DTOs/
-│  │  │  └─ AuthModels.cs
+│  │  │  ├─ AuthModels.cs
+│  │  │  └─ UserManagementModels.cs
 │  │  ├─ Entities/
 │  │  │  ├─ Role.cs
 │  │  │  └─ User.cs
+│  │  ├─ Repositories/
+│  │  │  ├─ IUserManagementRepository.cs
+│  │  │  └─ UserManagementRepository.cs
 │  │  └─ Services/
 │  │     ├─ IAuthService.cs
-│  │     └─ AuthService.cs
+│  │     ├─ AuthService.cs
+│  │     ├─ IUserManagementService.cs
+│  │     └─ UserManagementService.cs
 │  └─ Warehouse/
 │     ├─ WarehouseModule.cs
 │     ├─ Controllers/
@@ -209,6 +217,8 @@ MapControllers
 
 ```csharp
 services.AddScoped<IAuthService, AuthService>();
+services.AddScoped<IUserManagementRepository, UserManagementRepository>();
+services.AddScoped<IUserManagementService, UserManagementService>();
 ```
 
 ### WarehouseModule
@@ -283,9 +293,80 @@ AuthService 查询 Users JOIN Roles
 返回用户和角色
 ```
 
-当前登录不签发 Token，也不建立服务端 Session。
+登录成功后签发 HttpOnly Cookie，有效期 8 小时。Controller 通过
+`[Authorize(Roles = "admin")]` 控制管理员接口。
 
-## 9. 零部件数量业务
+### 8.4 退出接口
+
+```http
+POST /api/Auth/logout
+```
+
+要求当前 Cookie 已登录，成功返回 `204 No Content`。
+
+## 9. 用户管理接口
+
+全部要求管理员 Cookie：
+
+| 方法 | 地址 | 用途 |
+| --- | --- | --- |
+| GET | `/api/Users?page=1&pageSize=20` | 分页用户列表和可分配角色 |
+| POST | `/api/Users` | 新增用户 |
+| PUT | `/api/Users/{id}` | 修改姓名、角色或密码 |
+
+无登录返回 `401`，非管理员返回 `403`。
+
+分页规则：
+
+- `page` 最小为 1。
+- `pageSize` 默认 20，最大 20；传入更大值会按 20 处理。
+- 后端先执行 `COUNT(*)`。
+- 再使用 `OrderBy(Id).Skip(...).Take(...)` 只读取当前页。
+- 响应包含 `page`、`pageSize`、`totalCount`、`totalPages`。
+
+用户列表响应结构：
+
+```json
+{
+  "users": [],
+  "roles": [],
+  "page": 1,
+  "pageSize": 20,
+  "totalCount": 59,
+  "totalPages": 2
+}
+```
+
+该方案限制单次返回和渲染的数据量。十万、百万级用户不会一次性加载到内存，
+但 `COUNT(*)` 和很深的 `OFFSET` 仍可能有数据库查询成本；数据量进一步增大时
+可再改为索引游标分页。
+
+新增请求：
+
+```json
+{
+  "username": "engineer01",
+  "password": "123456",
+  "realName": "张工程师",
+  "roleId": 2
+}
+```
+
+编辑时密码传 `null` 表示保持原密码。
+
+用户管理调用链：
+
+```text
+UsersController
+  ↓
+IUserManagementService
+  ↓
+IUserManagementRepository
+  ↓
+AppDbContext / MySQL
+```
+
+## 10. 零部件数量业务
 
 ### 9.1 当前业务
 
@@ -349,7 +430,7 @@ Data/db.json
 
 Repository 使用 `SemaphoreSlim` 串行化文件读写。
 
-## 10. MySQL 数据库
+## 11. MySQL 数据库
 
 ### 10.1 连接
 
@@ -425,7 +506,7 @@ EnsureCreatedAsync
 
 `EnsureCreatedAsync` 只适合当前初始阶段。后续表结构开始变化时，应替换为 EF Core migrations。
 
-## 11. 异常处理
+## 12. 异常处理
 
 全局异常处理器：
 
@@ -441,7 +522,7 @@ Shared/Web/ApiExceptionHandler.cs
 
 接口错误尽量使用 ProblemDetails，而不是随意返回匿名 `{ message }`。
 
-## 12. 配置
+## 13. 配置
 
 `appsettings.json` 当前包含：
 
@@ -454,7 +535,7 @@ ConnectionStrings:DefaultConnection
 
 `Inventory:DataFile` 用于零部件数量 JSON 文件。
 
-## 13. 调试和测试
+## 14. 调试和测试
 
 构建：
 
@@ -481,18 +562,21 @@ core/core/core.http
 | 方法 | 地址 | 用途 |
 | --- | --- | --- |
 | POST | `/api/Auth/login` | 登录 |
+| POST | `/api/Auth/logout` | 退出 |
+| GET | `/api/Users` | 管理员读取用户 |
+| POST | `/api/Users` | 管理员新增用户 |
+| PUT | `/api/Users/{id}` | 管理员修改用户 |
 | GET | `/api/PartQuantity` | 读取数量 |
 | PUT | `/api/PartQuantity` | 保存数量 |
 
-## 14. 安全和技术债
+## 15. 安全和技术债
 
 当前必须明确：
 
 - 密码明文保存。
-- 登录不返回 Token。
+- Cookie 使用 HTTP，正式部署应启用 HTTPS。
 - PartQuantity 接口没有 `[Authorize]`。
-- 用户角色只用于前端展示。
-- 前端 localStorage 可被修改。
+- 前端 localStorage 只用于界面状态，权限以后端 Cookie 为准。
 - 数据库连接字符串包含本地开发凭据。
 - `EnsureCreated` 不能处理后续结构变更。
 - 零部件数量仍使用 JSON，与用户/角色不在同一个数据库。
@@ -504,10 +588,10 @@ core/core/core.http
 3. 接口鉴权与角色授权。
 4. 配置密钥外置。
 5. EF Core migrations。
-6. 用户和角色管理 API。
+6. 用户禁用、删除和最后管理员保护。
 7. 业务数据统一进入 MySQL。
 
-## 15. 后续业务规划
+## 16. 后续业务规划
 
 建议按以下顺序扩展仓库模块：
 
@@ -516,5 +600,5 @@ core/core/core.http
 3. 出入库流水。
 4. 领料申请。
 5. 仓库发放和驳回。
-6. 用户和角色管理。
-7. 权限菜单和接口授权。
+6. 用户禁用与审计。
+7. 更细的角色权限。
